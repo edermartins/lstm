@@ -43,7 +43,6 @@ or activate the `venv` and run the `lstm.py` file (in my case, the virtual envir
 ```bash
 # conda activate tf-wsl
 (tf-wsl) # python lstm.py
-
 ```
 
 
@@ -52,53 +51,68 @@ or activate the `venv` and run the `lstm.py` file (in my case, the virtual envir
 ```python
 import math
 from LstmWrapper import LstmWrapper
+from CommandLine import lstm_command_line_args
 
-'''
-Setting the variables
-'''
-# Dataset
-dataset_path = 'data/big_tech_stock_prices.csv'
-# Filtering the dataset with multiple companies stocks
-filter_stocks = {'filed_name': 'stock_symbol', 'field_text':'GOOGL'}
-# Number os splits to generate the train and test use by TimeSeriesSplit
-n_splits = 20
-# Number of hidden layers
-hidden_layers = 4
-# Number of neurons for each layer
-units = 300
-# Number of epochs
-epochs = 300
-# Verbose 0 = none, 1 more detail, 2 a lot of details and go on til 4
-verbose = 0
-# Selecting the Features (x)
-features = ['open', 'high', 'low', 'volume']
-# Select predict values (y)
-y_value = 'adj_close'
+# Get command line arguments or default values if not arguments
+args = lstm_command_line_args()
 
-'''
-Starting code
-'''
 # Creating the wrapper
-lstmWrapper = LstmWrapper()
+lstm_wrapper = LstmWrapper()
 
 # Creating and setting the LSTM model
-lstmWrapper.create_setting_model(dataset_path=dataset_path, filter_stocks=filter_stocks, features=features, y_value=y_value, n_splits=n_splits, hidden_layers=hidden_layers, units=units)
+lstm_wrapper.create_setting_model(dataset_path=args.dataset_path, filter_stocks=args.filter_stocks, features=args.features, y_value=args.y_value, n_splits=args.n_splits, hidden_layers=args.hidden_layers, units=args.units)
 
 # Training the model
-lstmWrapper.fit(epochs=epochs)
+lstm_wrapper.fit(epochs=args.epochs)
 
 # Evaluating the model
-score = lstmWrapper.evaluate(verbose=verbose)
+score = lstm_wrapper.evaluate(verbose=args.verbose)
 trainScore = score['train']
 testScore = score['test']
 print('Train Score: %.2f MSE (%.2f RMSE)' % (trainScore, math.sqrt(trainScore)))
 print('Test Score: %.2f MSE (%.2f RMSE)' % (testScore, math.sqrt(testScore)))
 ```
 
+### Command line option
+
+If you not pass any arguments, default values will seted:
+
+```text
+usage: lstm.py [-h] [-d] [-fs] [-f] [-y] [-n] [-hl] [-u] [-e] [-v]
+
+options:
+  -h, --help            show this help message and exit
+  -d , --dataset_path   path to dataset. Default: 'data/big_tech_stock_prices.csv'
+  -fs , --filter_stocks Column name and value to be filtered (between quotes and with no spaces). 
+                        Default: "{'filed_name':'stock_symbol','field_text':'GOOGL'}"
+                        
+  -f , --features       Array with the field names to use as features (between quotes and with no spaces).
+                        Default: "['open','high','low','volume']"
+
+  -y , --y_value        y value is the name of field in the dataset that your model will predict.
+                        Default: "adj_close"
+
+  -n , --n_splits       n_splits is the number that you will slices you dataset.
+                        Default: 4
+
+  -hl , --hidden_layers hidden_layers is the number of internal layers of your model.
+                        Default: 4
+
+  -u , --units          units is the number of neurons of you hidden layers. 
+                        Default: 10
+
+  -e , --epochs         epochs is the number of repetitions to train you model. 
+                        Default: 10
+
+  -v , --verbose        How much data you need to output. O is only necessary more numbers more output data.
+                        Default: 0
+```
+
+
 ## Start API services: `lstm-sercice.py`
 
 This service was made with Flask. So you need to install it: `pip install flask`
-Just run the script and it will be waiting for API REST calls:
+Just run the script. It will be waiting for API REST calls:
 ` python lstm-sercice.py`
 
 Or use Conda command:
@@ -184,6 +198,6 @@ Responses:
 - 422
 ```json
 {
-    "message": "message": "Model wasn't trained"
+    "message": "Model wasn't trained"
 }
 ```
