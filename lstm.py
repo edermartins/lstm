@@ -28,16 +28,16 @@ y_value = 'adj_close'
 Starting code
 '''
 # Creating the wrapper
-lstmWrapper = LstmWrapper()
+lstm_wrapper = LstmWrapper()
 
 # Creating and setting the LSTM model
-lstmWrapper.create_setting_model(dataset_path=dataset_path, filter_stocks=filter_stocks, features=features, y_value=y_value, n_splits=n_splits, hidden_layers=hidden_layers, units=units)
+lstm_wrapper.create_setting_model(dataset_path=dataset_path, filter_stocks=filter_stocks, features=features, y_value=y_value, n_splits=n_splits, hidden_layers=hidden_layers, units=units)
 
 # Training the model
-lstmWrapper.fit(epochs=epochs)
+lstm_wrapper.fit(epochs=epochs)
 
 # Evaluating the model
-score = lstmWrapper.evaluate(verbose=verbose)
+score = lstm_wrapper.evaluate(verbose=verbose)
 trainScore = score['train']
 testScore = score['test']
 print('Train Score: %.2f MSE (%.2f RMSE)' % (trainScore, math.sqrt(trainScore)))

@@ -94,3 +94,96 @@ testScore = score['test']
 print('Train Score: %.2f MSE (%.2f RMSE)' % (trainScore, math.sqrt(trainScore)))
 print('Test Score: %.2f MSE (%.2f RMSE)' % (testScore, math.sqrt(testScore)))
 ```
+
+## Start API services: `lstm-sercice.py`
+
+This service was made with Flask. So you need to install it: `pip install flask`
+Just run the script and it will be waiting for API REST calls:
+` python lstm-sercice.py`
+
+Or use Conda command:
+
+`conda run -n tf-wsl --no-capture-output python -m flask run`
+
+### Endpoints available
+
+#### POST model 
+Create the model using the body params.
+
+Request:
+```json
+{
+    "filter_stocks": {"filed_name": "stock_symbol", "field_text":"GOOGL"},
+    "features": ["open", "high", "low", "volume"],
+    "y_value": "adj_close", 
+    "n_splits":20, 
+    "hidden_layers":4, 
+    "units":100
+}
+```
+Responses:
+
+- 201
+```json
+{
+    "message": "Model LSTM created with success"
+}
+```
+- Otherwise, is an error
+
+#### POST model/fit 
+Train the model created in `POST /model`. As the training can get a lot of time, this endpoint is async. If you get code 201, you need to try `/model/evaluate` till it gets success. 
+
+Request:
+```json
+{
+    "epochs": 10
+}
+```
+Responses:
+- 201 This is a Async call (if you try again will get an error)
+```json
+{
+    "message": "Model LSTM training in progress"
+}
+```
+- 402
+```json
+{
+    "message": "message"
+}
+```
+Messages:
+- `Model wasn't created`
+- `Model still training in progress`
+
+#### POST model/evaluate 
+This function evaluate your model when ready as the endpoint `/model/fit` is asynx. After training the model and calling `/model/fit`, you need to try this method till you get success.
+
+Request:
+```json
+{
+    "verbose": 0
+}
+```
+
+Responses:
+- 201
+```json
+{
+    "test_score": {
+        "mse": 4157.3818359375,
+        "rmse": 64.47776233661882
+    },
+    "train_score": {
+        "mse": 1187.6351318359375,
+        "rmse": 34.46208252320132
+    }
+}
+```
+- 422
+```json
+{
+    "message": "message": "Model wasn't trained"
+}
+```
